@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Waste Sorter</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%232f9e44' d='M9 3h6l1 2h4v2H4V5h4zm-3 6h12l-1 12H7z'/></svg>">
+<style>
+:root{
+  --bg:#f5f6f4; --panel:#ffffff; --ink:#1d2320; --muted:#68716c; --line:#e3e6e2; --soft:#eef1ed;
+  --bio:#2f9e44; --rec:#1c7ed6; --non:#7d858c; --med:#e03131; --unk:#e8950c;
+  --radius:14px; --shadow:0 1px 2px rgba(0,0,0,.05),0 4px 16px rgba(0,0,0,.05);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#121514; --panel:#1b1f1d; --ink:#e8ece9; --muted:#9aa49e; --line:#2b312e; --soft:#232825;
+  --shadow:none; color-scheme:dark;}}
+:root[data-theme="dark"]{--bg:#121514; --panel:#1b1f1d; --ink:#e8ece9; --muted:#9aa49e; --line:#2b312e; --soft:#232825; --shadow:none; color-scheme:dark;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1240px;margin:0 auto;padding:20px 20px 40px}
+header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+.logo{width:38px;height:38px;border-radius:10px;background:var(--bio);display:grid;place-items:center}
+h1{font-size:20px;margin:0;letter-spacing:-.01em}
+.sub{color:var(--muted);font-size:13px}
+.badge{margin-left:auto;font-size:12px;padding:6px 10px;border-radius:99px;background:var(--soft);color:var(--muted);border:1px solid var(--line)}
+.tabs{display:flex;gap:6px;margin-bottom:16px}
+.tab{border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:8px 16px;border-radius:99px;cursor:pointer;font:inherit}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:16px}
+@media (max-width:900px){.grid{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
+.card h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 12px;font-weight:600}
+.stage{position:relative;aspect-ratio:4/3;background:#0b0d0c;border-radius:10px;overflow:hidden;display:grid;place-items:center}
+.stage video,.stage img.preview{width:100%;height:100%;object-fit:cover}
+.roi{position:absolute;aspect-ratio:1;height:72%;border:4px solid var(--roi,#fff);border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.28);transition:border-color .25s}
+.stage .placeholder{color:#9aa49e;text-align:center;padding:20px;font-size:14px}
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;align-items:center}
+button.btn{font:inherit;border:1px solid var(--line);background:var(--soft);color:var(--ink);padding:8px 14px;border-radius:10px;cursor:pointer}
+button.btn.primary{background:var(--bio);border-color:var(--bio);color:#fff}
+button.btn:disabled{opacity:.5;cursor:not-allowed}
+select{font:inherit;padding:7px 10px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink);max-width:100%}
+.fps{margin-left:auto;color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
+.result{border-left:8px solid var(--c,var(--line));padding-left:14px;min-height:92px}
+.result .cat{font-size:28px;font-weight:700;letter-spacing:-.02em;color:var(--c,var(--ink))}
+.result .conf{font-variant-numeric:tabular-nums;color:var(--muted)}
+.result .hint{margin-top:4px;font-size:14px}
+.bars{display:grid;gap:9px;margin-top:16px}
+.bar{display:grid;grid-template-columns:118px 1fr 48px;gap:10px;align-items:center;font-size:14px}
+.track{height:10px;background:var(--soft);border-radius:99px;overflow:hidden}
+.fill{height:100%;width:0;border-radius:99px;transition:width .2s}
+.pct{text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}
+.teach{margin-top:18px;padding-top:14px;border-top:1px dashed var(--line)}
+.teach p{margin:0 0 8px;font-size:13px;color:var(--muted)}
+.teach .row{display:flex;gap:6px;flex-wrap:wrap}
+.teach button{font:inherit;font-size:13px;padding:6px 10px;border-radius:8px;cursor:pointer;border:1px solid var(--c);color:var(--c);background:transparent}
+.teach button:hover{background:var(--c);color:#fff}
+.top{margin:12px 0 0;padding:0;list-style:none;font-size:13px;color:var(--muted)}
+.top li{display:flex;justify-content:space-between;padding:2px 0}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:560px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.stat{background:var(--soft);border-radius:10px;padding:10px 12px;border-top:4px solid var(--c)}
+.stat b{display:block;font-size:24px;font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--muted)}
+.history{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:10px;margin-top:14px}
+.item{background:var(--soft);border-radius:10px;overflow:hidden;font-size:12px;border-bottom:4px solid var(--c)}
+.item img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
+.item div{padding:6px 8px}
+.item small{color:var(--muted)}
+.drop{border:2px dashed var(--line);border-radius:12px;padding:34px 16px;text-align:center;color:var(--muted);cursor:pointer;transition:.2s}
+.drop.over{border-color:var(--bio);background:var(--soft)}
+.metrics{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.metric{background:var(--soft);border-radius:10px;padding:10px 12px}
+.metric b{display:block;font-size:20px;font-variant-numeric:tabular-nums}
+.metric span{font-size:12px;color:var(--muted)}
+.legend{display:grid;gap:8px;font-size:13px}
+.legend div{display:grid;grid-template-columns:14px 1fr;gap:10px;align-items:start}
+.legend i{width:14px;height:14px;border-radius:4px;margin-top:3px;background:var(--c)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;transition:.25s;pointer-events:none}
+.toast.show{opacity:1}
+.stack{display:grid;gap:16px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo"><svg width="22" height="22" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M9 3h6l1 2h4v2H4V5h4zm-3 6h12l-1 12H7z"/></svg></div>
+    <div><h1>Waste Sorter</h1><div class="sub">Real-time classification: biodegradable · recyclable · non-recyclable · medical</div></div>
+    <span class="badge" id="engine">loading model…</span>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" aria-selected="true" data-tab="live">Live camera</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="upload">Upload images</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="about">Model &amp; categories</button>
+  </div>
+
+  <!-- LIVE -->
+  <section id="tab-live" class="stack">
+    <div class="grid">
+      <div class="card">
+        <h2>Camera</h2>
+        <div class="stage" id="stage">
+          <video id="video" playsinline muted hidden></video>
+          <div class="roi" id="roi" hidden></div>
+          <div class="placeholder" id="ph">Press <b>Start camera</b> and allow camera access.<br>Hold one item inside the box.</div>
+        </div>
+        <div class="controls">
+          <button class="btn primary" id="startBtn">Start camera</button>
+          <button class="btn" id="pauseBtn" disabled>Pause</button>
+          <select id="camSel" aria-label="Camera" hidden></select>
+          <label class="sub"><input type="checkbox" id="mirror"> Mirror</label>
+          <span class="fps" id="fps"></span>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Result</h2>
+        <div class="result" id="result">
+          <div class="cat" id="rCat">—</div>
+          <div class="conf" id="rConf">Waiting for an image</div>
+          <div class="hint" id="rHint"></div>
+        </div>
+        <div class="bars" id="bars"></div>
+        <ul class="top" id="topList"></ul>
+        <div class="teach">
+          <p>Wrong? Teach it the correct category. The photo is saved for the next training run.</p>
+          <div class="row" id="teachRow"></div>
+        </div>
+        <div class="controls"><button class="btn" id="logBtn" disabled>Log this item</button>
+          <span class="sub">Adds the current result to the session below.</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>This session</h2>
+      <div class="stats" id="stats"></div>
+      <div class="history" id="history"></div>
+    </div>
+  </section>
+
+  <!-- UPLOAD -->
+  <section id="tab-upload" class="stack" hidden>
+    <div class="card">
+      <h2>Upload</h2>
+      <label class="drop" id="drop">
+        <input type="file" id="file" accept="image/*" multiple hidden>
+        <b>Drop images here</b> or click to choose. Several at once is fine.
+      </label>
+      <div class="history" id="uploads"></div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="tab-about" class="stack" hidden>
+    <div class="grid">
+      <div class="card">
+        <h2>Test-set performance</h2>
+        <div class="metrics" id="metrics"><span class="sub">No metrics file found for this model yet.</span></div>
+      </div>
+      <div class="card">
+        <h2>Categories</h2>
+        <div class="legend">
+          <div style="--c:var(--bio)"><i></i><span><b>Biodegradable</b> — food scraps, fruit and vegetable peels, leaves, flowers.</span></div>
+          <div style="--c:var(--rec)"><i></i><span><b>Recyclable</b> — paper, notes, books, cardboard, plastic bottles, metal cans, glass.</span></div>
+          <div style="--c:var(--non)"><i></i><span><b>Non-recyclable</b> — thermocol, chip packets and wrappers, dirty packaging, cloth, leather, shoes, batteries (special collection).</span></div>
+          <div style="--c:var(--med)"><i></i><span><b>Medical waste</b> — tablet strips, syringes and needles, masks, gloves, medicine bottles, bandages.</span></div>
+          <div style="--c:var(--unk)"><i></i><span><b>Unknown</b> — the model is not confident enough; sort by hand.</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const COLORS = {biodegradable:"var(--bio)", recyclable:"var(--rec)", non_recyclable:"var(--non)", medical:"var(--med)", unknown:"var(--unk)"};
+const $ = id => document.getElementById(id);
+let INFO = null, stream = null, running = false, paused = false, ema = null, last = null, lastThumb = null;
+const SMOOTH = 0.4, session = [];
+const canvas = document.createElement("canvas");
+
+function toast(msg){ const t=$("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove("show"),2200); }
+const pct = p => (p*100).toFixed(0)+"%";
+
+// ---------- tabs
+document.querySelectorAll(".tab").forEach(b => b.onclick = () => {
+  document.querySelectorAll(".tab").forEach(x => x.setAttribute("aria-selected", x===b));
+  ["live","upload","about"].forEach(t => $("tab-"+t).hidden = t !== b.dataset.tab);
+});
+
+// ---------- info
+async function loadInfo(){
+  try{
+    INFO = await (await fetch("/api/info")).json();
+    $("engine").textContent = INFO.engine + " · unknown < " + pct(INFO.threshold);
+    buildBars(); buildTeach(); buildStats(); buildMetrics();
+  }catch(e){ $("engine").textContent = "server not reachable"; }
+}
+function buildBars(){
+  $("bars").innerHTML = INFO.categories.map(c => `<div class="bar" style="--c:${COLORS[c]}">
+    <span>${INFO.labels[c]}</span><div class="track"><div class="fill" id="f-${c}" style="background:${COLORS[c]}"></div></div>
+    <span class="pct" id="p-${c}">0%</span></div>`).join("");
+}
+function buildTeach(){
+  $("teachRow").innerHTML = INFO.categories.map(c =>
+    `<button style="--c:${COLORS[c]}" data-c="${c}">${INFO.labels[c]} <small>(${INFO.taught[c]||0})</small></button>`).join("");
+  $("teachRow").querySelectorAll("button").forEach(b => b.onclick = () => teach(b.dataset.c));
+}
+function buildStats(){
+  const counts = Object.fromEntries(INFO.categories.concat("unknown").map(c=>[c,0]));
+  session.forEach(s => counts[s.category || "unknown"]++);
+  $("stats").innerHTML = INFO.categories.map(c => `<div class="stat" style="--c:${COLORS[c]}"><b>${counts[c]}</b><span>${INFO.labels[c]}</span></div>`).join("");
+}
+function buildMetrics(){
+  const m = INFO.metrics || {};
+  const t = m.test || {}, cells = [];
+  const add = (v,label) => v!=null && cells.push(`<div class="metric"><b>${typeof v==="number"? (v*100).toFixed(1)+"%" : v}</b><span>${label}</span></div>`);
+  if (t.probs){ add(t.probs.accuracy,"Accuracy (4 categories)"); add(t.probs.macro_f1,"Macro-F1"); }
+  if (t.zero_shot) add(t.zero_shot.accuracy,"Zero-shot only");
+  if (t.probe) add(t.probe.accuracy,"Trained head only");
+  if (m.test_accuracy!=null){ add(m.test_accuracy,"Accuracy (10 classes)"); add(m.test_macro_f1,"Macro-F1"); }
+  const ps = m.test_per_source || m.test_accuracy_per_source || {};
+  Object.entries(ps).forEach(([k,v]) => add(v, "Accuracy · "+k.replace("_"," ")));
+  if (m.false_medical_rate!=null) add(m.false_medical_rate,"Non-medical flagged medical");
+  if (cells.length) $("metrics").innerHTML = cells.join("");
+}
+
+// ---------- rendering
+function render(r){
+  last = r;
+  const probs = r.probs;
+  if (!ema) ema = {...probs}; else for (const c in probs) ema[c] = SMOOTH*probs[c] + (1-SMOOTH)*ema[c];
+  const best = Object.keys(ema).reduce((a,b)=> ema[a]>ema[b]?a:b);
+  const unknown = ema[best] < INFO.threshold;
+  const cat = unknown ? "unknown" : best;
+  $("result").style.setProperty("--c", COLORS[cat]);
+  $("roi").style.setProperty("--roi", getComputedStyle(document.documentElement).getPropertyValue(COLORS[cat].slice(4,-1)));
+  $("rCat").textContent = unknown ? "Unknown — check manually" : INFO.labels[best];
+  $("rConf").textContent = `${pct(ema[best])} confident` + (unknown ? ` · best guess: ${INFO.labels[best]}` : "");
+  $("rHint").textContent = r.hint || "";
+  for (const c of INFO.categories){ $("f-"+c).style.width = pct(ema[c]); $("p-"+c).textContent = pct(ema[c]); }
+  $("topList").innerHTML = (r.top||[]).map(t=>`<li><span>${t.name}</span><span>${pct(t.score)}</span></li>`).join("");
+  $("logBtn").disabled = false;
+  return {category: unknown?null:best, best, conf: ema[best]};
+}
+function addCard(container, thumb, category, best, conf, extra=""){
+  const c = category || "unknown";
+  const div = document.createElement("div");
+  div.className = "item"; div.style.setProperty("--c", COLORS[c]);
+  div.innerHTML = `<img alt="" src="${thumb}"><div><b>${category? INFO.labels[category] : "Unknown"}</b><br><small>${pct(conf)}${category?"":" · "+INFO.labels[best]}${extra}</small></div>`;
+  container.prepend(div);
+}
+
+// ---------- camera
+async function listCams(){
+  const devs = (await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==="videoinput");
+  $("camSel").innerHTML = devs.map((d,i)=>`<option value="${d.deviceId}">${d.label||"Camera "+(i+1)}</option>`).join("");
+  $("camSel").hidden = devs.length < 2;
+}
+async function startCam(deviceId){
+  if (stream) stream.getTracks().forEach(t=>t.stop());
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({video: deviceId? {deviceId:{exact:deviceId}, width:1280, height:720} : {width:1280, height:720, facingMode:"environment"}, audio:false});
+  }catch(e){ toast("Camera blocked: allow camera access in the browser"); return; }
+  const v = $("video"); v.srcObject = stream; await v.play();
+  v.hidden = false; $("roi").hidden = false; $("ph").hidden = true;
+  $("pauseBtn").disabled = false; $("startBtn").textContent = "Stop camera";
+  await listCams();
+  if (!running){ running = true; loop(); }
+}
+function stopCam(){
+  running = false; if (stream) stream.getTracks().forEach(t=>t.stop()); stream = null;
+  $("video").hidden = true; $("roi").hidden = true; $("ph").hidden = false;
+  $("pauseBtn").disabled = true; $("startBtn").textContent = "Start camera"; $("fps").textContent = "";
+}
+function grabCrop(size=384){
+  const v = $("video"), w = v.videoWidth, h = v.videoHeight;
+  // the on-screen box covers 72 % of the displayed height; the video is object-fit:cover in a 4:3 stage
+  const stage = $("stage").getBoundingClientRect();
+  const scale = Math.max(stage.width / w, stage.height / h);
+  const side = 0.72 * stage.height / scale;
+  const sx = (w - side)/2, sy = (h - side)/2;
+  canvas.width = canvas.height = size;
+  const ctx = canvas.getContext("2d");
+  ctx.save();
+  if ($("mirror").checked){ ctx.translate(size,0); ctx.scale(-1,1); }
+  ctx.drawImage(v, sx, sy, side, side, 0, 0, size, size);
+  ctx.restore();
+  return canvas;
+}
+const toBlob = c => new Promise(r => c.toBlob(r, "image/jpeg", 0.88));
+async function loop(){
+  let t0 = performance.now(), frames = 0;
+  while (running){
+    if (paused || !stream){ await new Promise(r=>setTimeout(r,150)); continue; }
+    const c = grabCrop();
+    const blob = await toBlob(c);
+    try{
+      const r = await (await fetch("/api/classify",{method:"POST", body:blob, headers:{"Content-Type":"image/jpeg"}})).json();
+      if (r.error) throw new Error(r.error);
+      render(r);
+      lastThumb = c.toDataURL("image/jpeg", 0.7);
+      frames++;
+      const dt = (performance.now()-t0)/1000;
+      if (dt > 1){ $("fps").textContent = `${(frames/dt).toFixed(1)} FPS · ${r.ms} ms model`; t0 = performance.now(); frames = 0; }
+    }catch(e){ $("fps").textContent = "server error"; await new Promise(r=>setTimeout(r,800)); }
+  }
+}
+$("startBtn").onclick = () => stream ? stopCam() : startCam();
+$("pauseBtn").onclick = () => { paused = !paused; $("pauseBtn").textContent = paused ? "Resume" : "Pause"; };
+$("camSel").onchange = e => startCam(e.target.value);
+$("mirror").onchange = () => $("video").style.transform = $("mirror").checked ? "scaleX(-1)" : "";
+$("logBtn").onclick = () => {
+  if (!last || !lastThumb) return;
+  const best = Object.keys(ema).reduce((a,b)=> ema[a]>ema[b]?a:b), unknown = ema[best] < INFO.threshold;
+  session.push({category: unknown?null:best});
+  addCard($("history"), lastThumb, unknown?null:best, best, ema[best]); buildStats();
+};
+
+// ---------- teach
+async function teach(cat){
+  if (!stream){ toast("Start the camera first"); return; }
+  const blob = await toBlob(grabCrop(512));
+  const r = await (await fetch("/api/teach?category="+cat,{method:"POST", body:blob})).json();
+  if (r.error){ toast(r.error); return; }
+  INFO.taught[cat] = r.count; buildTeach();
+  toast(`Saved as ${INFO.labels[cat]} (${r.count} photos). Retrain to use them.`);
+}
+
+// ---------- upload
+async function classifyFiles(files){
+  for (const f of files){
+    if (!f.type.startsWith("image/")) continue;
+    const r = await (await fetch("/api/classify",{method:"POST", body:f})).json();
+    if (r.error){ toast(r.error); continue; }
+    const url = URL.createObjectURL(f);
+    addCard($("uploads"), url, r.category, r.best_guess, r.confidence, `<br>${r.hint}`);
+  }
+}
+$("file").onchange = e => classifyFiles(e.target.files);
+const drop = $("drop");
+["dragenter","dragover"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("over"); }));
+["dragleave","drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("over"); }));
+drop.addEventListener("drop", e => classifyFiles(e.dataTransfer.files));
+
+loadInfo();
+</script>
+</body>
+</html>

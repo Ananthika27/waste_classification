@@ -1,0 +1,28 @@
+{
+  "vlm": "/Users/ananthikagajendran/Desktop/waste_classification/models/siglip2-base-patch16-224",
+  "probe_C": 20,
+  "test": {
+    "zero_shot": {
+      "accuracy": 0.8331318016928658,
+      "macro_f1": 0.8178529101650435
+    },
+    "probe": {
+      "accuracy": 0.9873035066505441,
+      "macro_f1": 0.98752782003275
+    },
+    "probs": {
+      "accuracy": 0.9873035066505441,
+      "macro_f1": 0.98752782003275
+    }
+  },
+  "test_per_source": {
+    "garbage12": 0.9978089395267309,
+    "medical_commons": 0.9774193548387097,
+    "realwaste": 0.9666666666666667,
+    "trashnet": 0.7307692307692307
+  },
+  "false_medical_rate": 0.0,
+  "threshold": 0.59,
+  "w_zeroshot": 0.0,
+  "zs_scale": 112.66890716552734
+}

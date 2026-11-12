@@ -1,0 +1,10 @@
+                precision    recall  f1-score   support
+
+ biodegradable      0.985     0.989     0.987       274
+    recyclable      0.978     0.995     0.987      1270
+non_recyclable      0.993     0.982     0.988      1454
+       medical      1.000     0.977     0.989       310
+
+      accuracy                          0.987      3308
+     macro avg      0.989     0.986     0.988      3308
+  weighted avg      0.987     0.987     0.987      3308

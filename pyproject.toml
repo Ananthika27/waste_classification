@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "waste-classifier"
+version = "0.1.0"
+description = "Waste classification with a classical computer-vision baseline and a MobileNetV2 CNN"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=2.0",
+    "opencv-python>=4.8",
+    "scikit-image>=0.22",
+    "scikit-learn>=1.4",
+    "pandas>=2.0",
+    "matplotlib>=3.8",
+    "pillow>=10.0",
+    "torch>=2.2",
+    "torchvision>=0.17",
+    "transformers>=4.49",
+    "sentencepiece",
+    "protobuf",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

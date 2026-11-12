@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Environments
+venv/
+.venv/
+.env
+
+# Editors / OS
+.DS_Store
+.vscode/
+.idea/
+
+# Data and model weights (too large for git; see data/README.md)
+data/raw/
+data/interim/
+data/processed/*.csv
+!data/processed/manifest.csv
+models/*.pt
+models/*.onnx
+models/siglip2-*/
+
+# Local staging folder from the repo cleanup
+_to_delete/
+
+# Logs
+logs/
+.pytest_cache/
+data/processed/*.npz
