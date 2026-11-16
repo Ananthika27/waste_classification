@@ -31,3 +31,9 @@ _to_delete/
 logs/
 .pytest_cache/
 data/processed/*.npz
+
+# Slide-deck build dependencies
+presentation/node_modules/
+
+# Report build folder
+report/_build/

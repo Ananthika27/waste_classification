@@ -67,7 +67,11 @@ select{font:inherit;padding:7px 10px;border-radius:10px;border:1px solid var(--l
 .item img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
 .item div{padding:6px 8px}
 .item small{color:var(--muted)}
-.drop{border:2px dashed var(--line);border-radius:12px;padding:34px 16px;text-align:center;color:var(--muted);cursor:pointer;transition:.2s}
+.drop{display:block;box-sizing:border-box;width:100%;border:2px dashed var(--line);border-radius:12px;padding:34px 16px;text-align:center;color:var(--muted);cursor:pointer;transition:.2s}
+.drop:hover{border-color:var(--bio)}
+#uploads{margin-top:18px;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;align-items:start}
+#uploads:empty{display:none}
+#uploads .item div{padding:8px 10px;line-height:1.45}
 .drop.over{border-color:var(--bio);background:var(--soft)}
 .metrics{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
 .metric{background:var(--soft);border-radius:10px;padding:10px 12px}

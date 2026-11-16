@@ -20,8 +20,8 @@ data/
 
 | Source | Content | License | How to get it |
 |---|---|---|---|
-| TrashNet (Thung & Yang, 2016) | Single objects on a white board, 6 classes | MIT | github.com/garythung/trashnet |
-| Garbage Classification, 12 classes (Kaggle) | Mostly web images, 12 classes | ODbL | kaggle.com/datasets/mostafaabla/garbage-classification |
+| TrashNet (Thung & Yang, 2016) | Single objects on a white board, 6 classes | see repository | github.com/garythung/trashnet |
+| Garbage Classification, 12 classes (Kaggle) | Mostly web images, 12 classes | see Kaggle page | kaggle.com/datasets/mostafaabla/garbage-classification |
 | RealWaste (Single et al., 2023) | Real landfill photos, 9 classes | CC BY 4.0 | `python scripts/download_realwaste.py` |
 
 ## Combined 10-class dataset (`waste10`)

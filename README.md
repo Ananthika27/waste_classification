@@ -33,7 +33,8 @@ camera frame ─▶ centre crop ─▶ SigLIP 2 image encoder (Google, ViT-B/16)
 ```
 
 * The **trained head** learns from real photos, so it handles everyday materials accurately.
-* The **zero-shot concepts** let the model recognise items with little or no training data, especially medical waste. No public medical-waste image dataset was available, so this part needs no training photos.
+* The **zero-shot concepts** (68 text descriptions) were evaluated as a no-training baseline (83.3 % test accuracy). In the final model the trained head makes the decision, because blending the two gained under 0.002 macro-F1 on validation; the concepts are kept to produce the *"looks like: …"* explanation shown in the app.
+* **Medical waste** is learned from 1,031 freely licensed Wikimedia Commons photos, since no public medical-waste image dataset could be downloaded directly.
 * The blend weight, the zero-shot temperature and the UNKNOWN threshold are all tuned on the validation split. The test split is used once, for the final report.
 * **Teach it:** in the app, a wrong prediction can be corrected with one click. The photo is saved to `data/raw/user_captures/` and used in the next training run. This is the fastest way to adapt the model to your own camera, lighting and items.
 
@@ -51,18 +52,18 @@ Held-out **test split: 3,308 images**, never used for training or for choosing s
 
 | Category | Precision | Recall |
 |---|---|---|
-| Biodegradable | 0.985 | 0.978 |
-| Recyclable | 0.981 | 0.991 |
-| Non-recyclable | 0.986 | 0.983 |
-| Medical waste | 1.000 | 0.981 |
+| Biodegradable | 0.985 | 0.989 |
+| Recyclable | 0.978 | 0.995 |
+| Non-recyclable | 0.993 | 0.982 |
+| Medical waste | 1.000 | 0.977 |
 
 | By data source | Accuracy |
 |---|---|
 | Garbage-12 (web images) | 99.8 % |
-| **RealWaste (real landfill photos)** | **96.7 %** (old MobileNetV2: 45.1 %) |
+| **RealWaste (real landfill photos)** | **96.7 %** (old MobileNetV2 on the same 690 images: 75.5 % as 4 categories, 45.1 % as 10 classes) |
 | Medical photos (Wikimedia Commons) | 97.7 % |
 
-* **Medical:** syringes/needles, masks and gloves 100 %, ampoules/vials 98 %, swabs/bandages 99 %, pill bottles 94 %, blister packs 85 % (only 13 test photos). **0 %** of non-medical items were flagged as medical.
+* **Medical** (recall per item type): syringes/needles 100 %, gloves 100 %, swabs/bandages 98.6 %, ampoules/vials 96.0 %, masks 95.5 %, pill bottles 93.8 %, blister packs 84.6 % (only 13 test photos). **0 %** of non-medical items were flagged as medical.
 * **UNKNOWN threshold 0.59** (chosen on validation): 99 % of items get an answer, and 99.1 % of those answers are correct.
 * **Speed:** about 21 ms per image on an Apple M-series GPU (SigLIP 2 base, 375 M parameters).
 
@@ -103,7 +104,7 @@ python scripts/download_file.py \
 python scripts/prepare_data.py          # merge, de-duplicate, split
 
 # train the 4-category model
-python scripts/embed_dataset.py         # SigLIP embeddings for every image (~20-30 min on Apple M-series)
+python scripts/embed_dataset.py         # SigLIP embeddings for every image (about 5 min in the final run; longer on a busy machine)
 python scripts/train_waste4.py          # -> models/waste4_siglip.pt + metrics
 
 # run
